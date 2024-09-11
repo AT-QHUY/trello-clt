@@ -45,10 +45,10 @@ const PopOverWrapper = ({
   return (
     <Popover
       key={r.id}
-      position="bottom"
+      position="right-start"
       offset={{
-        mainAxis: -70,
-        crossAxis: 76,
+        mainAxis: -380,
+        // crossAxis: 76,
       }}
       opened={opened}
       onOpen={() => {
@@ -72,7 +72,7 @@ const PopOverWrapper = ({
         }}
       >
         <Flex gap={rem(10)}>
-          <Paper shadow="sm" withBorder radius={"md"} className={classes.item} w={rem(390)} h={rem(70)}>
+          <Paper shadow="sm" withBorder radius={"md"} className={classes.item} w={rem(386)} mih={rem(70)}>
             <TaskRow rowData={r} key={r.id} />
           </Paper>
           <Stack gap={rem(4)} align="flex-start">
