@@ -358,10 +358,9 @@ export const TrelloScreen = () => {
         bg={
           "linear-gradient(160deg, rgba(9,9,121,1) 0%, rgba(8,40,141,1) 0%, rgba(4,126,198,1) 34%, rgba(0,212,255,1) 100%)"
         }
-        pl={rem(40)}
+        px={rem(40)}
         pt={rem(32)}
         pb={rem(32)}
-        pr={rem(180)}
         flex={1}
       >
         <Box
@@ -374,10 +373,10 @@ export const TrelloScreen = () => {
           }}
           mb={rem(16)}
         >
-          <Text fw={500}>Your tasks</Text>
+          <Text fw={500}>Your task(s)</Text>
         </Box>
         <DragDropContext onDragEnd={onDragEnd}>
-          <SimpleGrid cols={4}>
+          <SimpleGrid cols={4} spacing={"xl"} pr={rem(140)}>
             {privateBucket.map((i) => (
               <Box key={"private" + i.id}>
                 <DroppableTaskColumn
@@ -414,7 +413,7 @@ export const TrelloScreen = () => {
             <IconBrandTeams color={"red"} />
           </Group>
         </Box>
-        <SimpleGrid cols={4}>
+        <SimpleGrid cols={4} spacing={"xl"} pr={rem(140)}>
           {publicBucket.map((i) => (
             <Box key={"public" + i.id}>
               <DroppableTaskColumn

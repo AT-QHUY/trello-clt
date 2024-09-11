@@ -86,7 +86,7 @@ const PopOverWrapper = ({
             >
               Show detail
             </Button>
-            {takeable && (
+            {takeable && r.isPublic == true && (
               <Button
                 variant={"white"}
                 onClick={() => {

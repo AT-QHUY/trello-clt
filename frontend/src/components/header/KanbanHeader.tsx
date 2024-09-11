@@ -1,14 +1,22 @@
-import { ActionIcon, Button, CloseButton, Group, rem, Text, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Button, CloseButton, Group, Loader, rem, Text, TextInput, Title } from "@mantine/core";
 import { useState } from "react";
 import { useSession, getPayloadFromToken } from "../../context/AuthContext";
 import { IconArrowRight, IconLogout, IconSearch } from "@tabler/icons-react";
 import { useSearchStore } from "../../App";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { useGetAllTaskList } from "../../hooks/useGetTaskListAPI";
 
 const KanbanHeader = () => {
   const [userDetail] = useState(getPayloadFromToken());
   const session = useSession();
   const searchValue = useSearchStore((state) => state.searchValue);
   const updateValue = useSearchStore((state) => state.updateSearchValue);
+  const debouncedSetValue = useDebouncedCallback((value) => updateValue(value), 1000);
+  const [value, setValue] = useState(searchValue);
+
+  const { isFetching } = useGetAllTaskList({
+    search: searchValue,
+  });
 
   return (
     <Group
@@ -23,7 +31,14 @@ const KanbanHeader = () => {
       }}
     >
       <Group>
-        <Title order={3} mr={rem(20)} c={"blue"}>
+        <Title
+          order={3}
+          mr={rem(20)}
+          c={"blue"}
+          style={{
+            cursor: "pointer",
+          }}
+        >
           DummyTrello
         </Title>
 
@@ -33,16 +48,27 @@ const KanbanHeader = () => {
           w={rem(520)}
           placeholder="Search anything"
           rightSectionWidth={42}
-          value={searchValue}
-          onChange={(e) => updateValue(e.currentTarget.value)}
+          value={value}
+          onChange={(e) => {
+            debouncedSetValue(e.currentTarget.value);
+            setValue(e.currentTarget.value);
+          }}
           leftSection={<IconSearch style={{ width: rem(18), height: rem(18) }} stroke={1.5} />}
           rightSection={
-            searchValue.length <= 0 ? (
+            isFetching ? (
+              <Loader />
+            ) : value.length <= 0 ? (
               <ActionIcon size={32} radius="xl" variant="filled">
                 <IconArrowRight style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
               </ActionIcon>
             ) : (
-              <CloseButton aria-label="Clear input" onClick={() => updateValue("")} />
+              <CloseButton
+                aria-label="Clear input"
+                onClick={() => {
+                  debouncedSetValue("");
+                  setValue("");
+                }}
+              />
             )
           }
         />
