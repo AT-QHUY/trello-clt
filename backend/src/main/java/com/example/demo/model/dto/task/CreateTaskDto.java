@@ -19,5 +19,4 @@ public class CreateTaskDto {
     private Date dueDate;
     @JsonProperty
     private boolean isPublic;
-    private UUID columnId;
 }

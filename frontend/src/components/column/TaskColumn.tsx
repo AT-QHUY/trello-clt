@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Group, Paper, Popover, rem, Stack, Text } from "@mantine/core";
+import { Box, Button, Flex, Group, Paper, Popover, rem, ScrollArea, Stack, Text } from "@mantine/core";
 import { Task, TaskList } from "../../models/Task";
 import { EditAddRowBucket } from "../../screens/TrelloScreen";
 import { IconBucketOff, IconCancel, IconHandGrab, IconInfoCircle } from "@tabler/icons-react";
@@ -25,6 +25,8 @@ type PopOverWrapper = {
   onTakeTask: (id: string) => void;
   onClickRow: (rowId: string, bucket: EditAddRowBucket) => void;
   onCancelTask: (id: string) => void;
+  cancelable?: boolean;
+  takeable?: boolean;
 };
 
 const PopOverWrapper = ({
@@ -35,6 +37,8 @@ const PopOverWrapper = ({
   onClickRow,
   onTakeTask,
   onCancelTask,
+  cancelable,
+  takeable,
 }: PopOverWrapper) => {
   const [opened, setOpened] = useState(false);
 
@@ -43,7 +47,7 @@ const PopOverWrapper = ({
       key={r.id}
       position="bottom"
       offset={{
-        mainAxis: -66,
+        mainAxis: -70,
         crossAxis: 76,
       }}
       opened={opened}
@@ -68,7 +72,7 @@ const PopOverWrapper = ({
         }}
       >
         <Flex gap={rem(10)}>
-          <Paper shadow="sm" withBorder radius={"md"} className={classes.item} w={rem(356)} h={rem(70)}>
+          <Paper shadow="sm" withBorder radius={"md"} className={classes.item} w={rem(390)} h={rem(70)}>
             <TaskRow rowData={r} key={r.id} />
           </Paper>
           <Stack gap={rem(4)} align="flex-start">
@@ -82,7 +86,7 @@ const PopOverWrapper = ({
             >
               Show detail
             </Button>
-            {r.isPublic && !r.attender && (
+            {takeable && (
               <Button
                 variant={"white"}
                 onClick={() => {
@@ -94,17 +98,19 @@ const PopOverWrapper = ({
                 Take task
               </Button>
             )}
-            <Button
-              variant={"white"}
-              c={"red"}
-              leftSection={<IconCancel />}
-              onClick={() => {
-                onCancelTask(r.id);
-                setOpened(false);
-              }}
-            >
-              Cancel
-            </Button>
+            {cancelable && (
+              <Button
+                variant={"white"}
+                c={"red"}
+                leftSection={<IconCancel />}
+                onClick={() => {
+                  onCancelTask(r.id);
+                  setOpened(false);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
           </Stack>
         </Flex>
       </Popover.Dropdown>
@@ -122,7 +128,7 @@ const TaskColumn = ({
   onCancelTask,
 }: TaskColumnProps) => {
   return (
-    <Box>
+    <ScrollArea.Autosize mah={260}>
       {data?.tasks.length == 0 && !renderFooter ? (
         <Paper shadow="md" py={rem(12)}>
           <Group gap={10} ml={rem(20)}>
@@ -142,11 +148,13 @@ const TaskColumn = ({
             onClickRow={onClickRow}
             onTakeTask={onTakeTask}
             setOverLay={setOverLay}
-            key={r.id}
+            key={r?.id}
+            cancelable={data?.name != "Cancel"}
+            takeable={data?.name == "To do" && r?.attender == null}
           />
         ))
       )}
-    </Box>
+    </ScrollArea.Autosize>
   );
 };
 

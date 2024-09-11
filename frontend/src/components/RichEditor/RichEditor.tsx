@@ -13,9 +13,10 @@ interface CustomInputProps {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
+  readonly?: boolean;
 }
 
-export const RichEditor = ({ value, defaultValue, onChange }: CustomInputProps) => {
+export const RichEditor = ({ value, defaultValue, onChange, readonly }: CustomInputProps) => {
   const [_value, handleChange] = useUncontrolled({
     value,
     defaultValue,
@@ -37,6 +38,7 @@ export const RichEditor = ({ value, defaultValue, onChange }: CustomInputProps) 
     onUpdate(props) {
       handleChange(props.editor.getHTML());
     },
+    editable: !readonly,
   });
 
   return (

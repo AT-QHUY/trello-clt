@@ -4,13 +4,13 @@ import {
   Button,
   Checkbox,
   Divider,
-  Flex,
   Group,
   LoadingOverlay,
   Modal,
   Overlay,
   rem,
   Select,
+  SimpleGrid,
   Text,
   TextInput,
   Title,
@@ -20,11 +20,19 @@ import { useGetAllTaskList } from "../hooks/useGetTaskListAPI";
 import { useEffect, useMemo, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { DateInput } from "@mantine/dates";
-import { IconCalendar, IconFileInfo, IconListDetails, IconReceipt, IconTags } from "@tabler/icons-react";
+import {
+  IconAsterisk,
+  IconBrandTeams,
+  IconCalendar,
+  IconFileInfo,
+  IconListDetails,
+  IconReceipt,
+  IconTags,
+} from "@tabler/icons-react";
 import { RichEditor } from "../components/RichEditor/RichEditor";
 import { useDisclosure } from "@mantine/hooks";
 import { useCreateTask } from "../hooks/useCreateTask";
-import { useForm } from "@mantine/form";
+import { isNotEmpty, useForm } from "@mantine/form";
 import { CreateTaskParams, MoveTaskParams, UpdateTaskParams } from "../apis/TaskAPI";
 import dayjs from "dayjs";
 import { useMutationGetTaskByID } from "../hooks/useGetTaskById";
@@ -89,7 +97,17 @@ export const TrelloScreen = () => {
       bucket: EditAddRowBucket.PRIVATE,
       columnId: "",
     },
-    validate: {},
+    validate: {
+      title: isNotEmpty("Title is required"),
+      dueDate(value) {
+        if (!value) {
+          return "Due date is required";
+        }
+        if (dayjs(value).isBefore(new Date(), "date")) {
+          return "Due date should be in the future";
+        }
+      },
+    },
   });
 
   const addForm = useForm<AddRow>({
@@ -97,12 +115,23 @@ export const TrelloScreen = () => {
     initialValues: {
       bucket: EditAddRowBucket.PRIVATE,
       description: "",
-      dueDate: new Date(),
+      dueDate: null,
       title: "",
+    },
+    validate: {
+      title: isNotEmpty("Title is required"),
+      dueDate(value) {
+        if (!value) {
+          return "Due date is required";
+        }
+        if (dayjs(value).isBefore(new Date(), "date")) {
+          return "Due date should be in the future";
+        }
+      },
     },
   });
 
-  const { data, isLoading, error, refetch: refetchAllTaskList } = useGetAllTaskList({ search: searchValue });
+  const { data, error, refetch: refetchAllTaskList } = useGetAllTaskList({ search: searchValue });
 
   const [openedEditingModal, { open: openEditingModal, close: closeEditingModal }] = useDisclosure(false);
   const [openedAddModal, { open: openAddModal, close: closeAddModal }] = useDisclosure(false);
@@ -117,6 +146,7 @@ export const TrelloScreen = () => {
   const [publicBucket, setPublicBucket] = useState<TaskList[]>([]);
 
   const handleOpenAddModal = (bucket: EditAddRowBucket) => {
+    addForm.reset();
     addForm.setFieldValue("bucket", bucket);
     openAddModal();
   };
@@ -187,6 +217,10 @@ export const TrelloScreen = () => {
 
   const toDoColumnData = useMemo(() => {
     return data?.find((i) => i.name === "To do");
+  }, [data]);
+
+  const cancelColumnData = useMemo(() => {
+    return data?.find((i) => i.name === "Cancel");
   }, [data]);
 
   const handleSubmitAddForm = ({ bucket, description, dueDate, title }: AddRow) => {
@@ -340,12 +374,12 @@ export const TrelloScreen = () => {
           }}
           mb={rem(16)}
         >
-          <Text fw={500}>Private</Text>
+          <Text fw={500}>Your tasks</Text>
         </Box>
         <DragDropContext onDragEnd={onDragEnd}>
-          <Flex gap={rem(60)}>
+          <SimpleGrid cols={4}>
             {privateBucket.map((i) => (
-              <Box key={"private" + i.id} flex={1}>
+              <Box key={"private" + i.id}>
                 <DroppableTaskColumn
                   onCancelTask={handleCancelTask}
                   data={i}
@@ -359,7 +393,7 @@ export const TrelloScreen = () => {
                 />
               </Box>
             ))}
-          </Flex>
+          </SimpleGrid>
         </DragDropContext>
 
         <Divider c={"white"} size={"md"} my={"xl"} />
@@ -373,11 +407,16 @@ export const TrelloScreen = () => {
           }}
           mb={rem(16)}
         >
-          <Text fw={500}>Public</Text>
+          <Group gap={8}>
+            <Text fw={500} c={"red"}>
+              Public
+            </Text>
+            <IconBrandTeams color={"red"} />
+          </Group>
         </Box>
-        <Flex gap={rem(60)}>
+        <SimpleGrid cols={4}>
           {publicBucket.map((i) => (
-            <Box key={"public" + i.id} flex={1}>
+            <Box key={"public" + i.id}>
               <DroppableTaskColumn
                 onCancelTask={handleCancelTask}
                 onTakeTask={handleTakeTask}
@@ -391,9 +430,11 @@ export const TrelloScreen = () => {
               />
             </Box>
           ))}
-        </Flex>
+        </SimpleGrid>
       </Box>
       {visible && <Overlay color="#000" backgroundOpacity={0.4} blur={2} />}
+
+      {/* Edit modal */}
       <Modal.Root
         opened={openedEditingModal}
         onClose={() => {
@@ -424,9 +465,18 @@ export const TrelloScreen = () => {
             <form onSubmit={editForm.onSubmit(handleSubmitEditAddForm)}>
               <Group align="center" mb={4} mt={"lg"}>
                 <IconTags color="black" />
-                <Text size="md" fw={500} c={"black"}>
-                  Title
-                </Text>
+                <Group gap={4}>
+                  <Text size="md" fw={500} c={"black"}>
+                    Title
+                  </Text>
+                  <IconAsterisk
+                    color="red"
+                    style={{
+                      width: rem(10),
+                      height: rem(10),
+                    }}
+                  />
+                </Group>
               </Group>
 
               <Box ml={rem(40)} mr={rem(20)}>
@@ -435,6 +485,7 @@ export const TrelloScreen = () => {
                   key={editForm.key("title")}
                   {...editForm.getInputProps("title")}
                   placeholder="Enter task title"
+                  readOnly={editForm.getValues().columnId == cancelColumnData?.id}
                 />
               </Box>
 
@@ -446,6 +497,7 @@ export const TrelloScreen = () => {
               </Group>
               <Group ml={rem(40)} mr={rem(20)}>
                 <Select
+                  readOnly={editForm.getValues().columnId == cancelColumnData?.id}
                   disabled={editForm.getValues().bucket == EditAddRowBucket.PUBLIC}
                   placeholder="Select a column"
                   w={400}
@@ -462,12 +514,22 @@ export const TrelloScreen = () => {
 
               <Group align="center" mb={4} mt={"lg"}>
                 <IconCalendar color="black" />
-                <Text size="md" fw={500} c={"black"}>
-                  Due date
-                </Text>
+                <Group gap={4}>
+                  <Text size="md" fw={500} c={"black"}>
+                    Due date
+                  </Text>
+                  <IconAsterisk
+                    color="red"
+                    style={{
+                      width: rem(10),
+                      height: rem(10),
+                    }}
+                  />
+                </Group>
               </Group>
               <Group ml={rem(40)} mr={rem(20)} gap={40}>
                 <DateInput
+                  readOnly={editForm.getValues().columnId == cancelColumnData?.id}
                   key={editForm.key("dueDate")}
                   {...editForm.getInputProps("dueDate")}
                   placeholder="Select due date"
@@ -479,6 +541,7 @@ export const TrelloScreen = () => {
                   </Text>
                   <Checkbox
                     key={editForm.key("isPublic")}
+                    readOnly={editForm.getValues().columnId == cancelColumnData?.id}
                     {...editForm.getInputProps("isPublic", {
                       type: "checkbox",
                     })}
@@ -498,13 +561,19 @@ export const TrelloScreen = () => {
                 </Text>
               </Group>
               <Box ml={rem(40)} mr={rem(20)}>
-                <RichEditor {...editForm.getInputProps("description")} key={editForm.key("description")} />
+                <RichEditor
+                  readonly={editForm.getValues().columnId == cancelColumnData?.id}
+                  {...editForm.getInputProps("description")}
+                  key={editForm.key("description")}
+                />
               </Box>
-              <Box ml={rem(40)} mr={rem(20)} mt={"lg"}>
-                <Button loading={isCreateTaskLoading} type="submit">
-                  Save
-                </Button>
-              </Box>
+              {editForm.getValues().columnId !== cancelColumnData?.id && (
+                <Box ml={rem(40)} mr={rem(20)} mt={"lg"}>
+                  <Button loading={isCreateTaskLoading} type="submit">
+                    Save
+                  </Button>
+                </Box>
+              )}
             </form>
           </Modal.Body>
         </Modal.Content>
@@ -542,9 +611,18 @@ export const TrelloScreen = () => {
             <form onSubmit={addForm.onSubmit(handleSubmitAddForm)}>
               <Group align="center" mb={4} mt={"lg"}>
                 <IconTags color="black" />
-                <Text size="md" fw={500} c={"black"}>
-                  Title
-                </Text>
+                <Group gap={4}>
+                  <Text size="md" fw={500} c={"black"}>
+                    Title
+                  </Text>
+                  <IconAsterisk
+                    color="red"
+                    style={{
+                      width: rem(10),
+                      height: rem(10),
+                    }}
+                  />
+                </Group>
               </Group>
 
               <Box ml={rem(40)} mr={rem(20)}>
@@ -558,9 +636,18 @@ export const TrelloScreen = () => {
 
               <Group align="center" mb={4} mt={"lg"}>
                 <IconCalendar color="black" />
-                <Text size="md" fw={500} c={"black"}>
-                  Due date
-                </Text>
+                <Group gap={4}>
+                  <Text size="md" fw={500} c={"black"}>
+                    Due date
+                  </Text>
+                  <IconAsterisk
+                    color="red"
+                    style={{
+                      width: rem(10),
+                      height: rem(10),
+                    }}
+                  />
+                </Group>
               </Group>
               <Group ml={rem(40)} mr={rem(20)} gap={40}>
                 <DateInput

@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Group, rem, Text, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Button, CloseButton, Group, rem, Text, TextInput, Title } from "@mantine/core";
 import { useState } from "react";
 import { useSession, getPayloadFromToken } from "../../context/AuthContext";
 import { IconArrowRight, IconLogout, IconSearch } from "@tabler/icons-react";
@@ -37,9 +37,13 @@ const KanbanHeader = () => {
           onChange={(e) => updateValue(e.currentTarget.value)}
           leftSection={<IconSearch style={{ width: rem(18), height: rem(18) }} stroke={1.5} />}
           rightSection={
-            <ActionIcon size={32} radius="xl" variant="filled">
-              <IconArrowRight style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-            </ActionIcon>
+            searchValue.length <= 0 ? (
+              <ActionIcon size={32} radius="xl" variant="filled">
+                <IconArrowRight style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+              </ActionIcon>
+            ) : (
+              <CloseButton aria-label="Clear input" onClick={() => updateValue("")} />
+            )
           }
         />
       </Group>

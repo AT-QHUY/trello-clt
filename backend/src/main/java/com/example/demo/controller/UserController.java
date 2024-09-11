@@ -19,12 +19,6 @@ public class UserController {
     @Autowired
     private IUserService userService;
 
-    @GetMapping("/test")
-//    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public String test(){
-        userService.getAllUsers();
-        return "";
-    }
 
     @GetMapping
     public List<GetUserDto> findAll() {

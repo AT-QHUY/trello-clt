@@ -6,7 +6,6 @@
   border: 1px solid #fff;
   background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-5));
   margin-bottom: var(--mantine-spacing-sm);
-  box-shadow: 0px 1px 1px #0d1b3540, 0px 0px 1px #0d1b3540, 0px 1px 1px #0d1b3540, 0px 0px 1px #0d1b3540;
   cursor: pointer;
 }
 

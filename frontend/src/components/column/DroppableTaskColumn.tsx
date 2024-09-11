@@ -1,5 +1,5 @@
 import { Droppable } from "@hello-pangea/dnd";
-import { Box, Button, Card, Text } from "@mantine/core";
+import { Box, Button, Card, Group, rem, Text } from "@mantine/core";
 import { TaskList } from "../../models/Task";
 import { IconPlus } from "@tabler/icons-react";
 import { EditAddRowBucket } from "../../screens/TrelloScreen";
@@ -17,6 +17,131 @@ export type DroppableTaskColumnProps = {
   onCancelTask: (id: string) => void;
 };
 
+const renderColumnHeader = (title: string, count: number) => {
+  switch (title) {
+    case "To do":
+      return (
+        <Card.Section py={"xs"} inheritPadding>
+          <Group gap={rem(2)} align="center">
+            <Text
+              c={"blue"}
+              size={"md"}
+              fw={500}
+              bg={"blue.0"}
+              span
+              py={rem(2)}
+              px={rem(16)}
+              style={{
+                borderRadius: rem(6),
+              }}
+            >
+              {title}
+            </Text>
+            <Text span fw={700} size="md" c={"blue"}>
+              ({count})
+            </Text>
+          </Group>
+        </Card.Section>
+      );
+    case "In progress":
+      return (
+        <Card.Section py={"xs"} inheritPadding>
+          <Group gap={rem(2)} align="center">
+            <Text
+              c={"orange"}
+              size={"md"}
+              fw={500}
+              bg={"yellow.0"}
+              span
+              py={rem(2)}
+              px={rem(16)}
+              style={{
+                borderRadius: rem(6),
+              }}
+            >
+              {title}
+            </Text>
+            <Text span fw={700} size="md" c={"orange"}>
+              ({count})
+            </Text>
+          </Group>
+        </Card.Section>
+      );
+    case "Done":
+      return (
+        <Card.Section py={"xs"} inheritPadding>
+          <Group gap={rem(2)} align="center">
+            <Text
+              c={"green"}
+              size={"md"}
+              fw={500}
+              bg={"green.0"}
+              span
+              py={rem(2)}
+              px={rem(16)}
+              style={{
+                borderRadius: rem(6),
+              }}
+            >
+              {title}
+            </Text>
+            <Text span fw={700} size="md" c={"green"}>
+              ({count})
+            </Text>
+          </Group>
+        </Card.Section>
+      );
+    case "Cancel":
+      return (
+        <Card.Section py={"xs"} inheritPadding>
+          <Group gap={rem(2)} align="center">
+            <Text
+              c={"red"}
+              size={"md"}
+              fw={500}
+              bg={"red.0"}
+              span
+              py={rem(2)}
+              px={rem(16)}
+              style={{
+                borderRadius: rem(6),
+              }}
+            >
+              {title}
+            </Text>
+            <Text span fw={700} size="md" c={"red"}>
+              ({count})
+            </Text>
+          </Group>
+        </Card.Section>
+      );
+    default:
+      return (
+        <Card.Section py={"xs"} inheritPadding>
+          <Group gap={rem(2)} align="center">
+            <Text
+              c={"blue"}
+              size={"md"}
+              fw={500}
+              bg={"blue.0"}
+              span
+              py={rem(2)}
+              px={rem(16)}
+              style={{
+                borderRadius: rem(6),
+              }}
+            >
+              {title}
+            </Text>
+            <Text span fw={700} size="md" c={"blue"}>
+              ({count})
+            </Text>
+          </Group>
+        </Card.Section>
+      );
+  }
+};
+
 const DroppableTaskColumn = ({
   isDroppable,
   data,
@@ -30,12 +155,18 @@ const DroppableTaskColumn = ({
 }: DroppableTaskColumnProps) => {
   if (!isDroppable) {
     return (
-      <Card shadow="sm" padding={"sm"} radius="md" withBorder bg={"#f1f2f4"}>
-        <Card.Section py={"xs"} inheritPadding>
-          <Text size={"md"} fw={500} ml={"sm"}>
-            {data.name}
-          </Text>
-        </Card.Section>
+      <Card
+        shadow="sm"
+        padding={"sm"}
+        radius="md"
+        bg={"#eeeeee"}
+        style={{
+          overflow: "hidden",
+        }}
+      >
+        <Box mb={rem(16)} mt={rem(4)}>
+          {renderColumnHeader(data?.name, data?.tasks?.length)}
+        </Box>
         <TaskColumn
           onCancelTask={onCancelTask}
           onTakeTask={onTakeTask}
@@ -79,12 +210,10 @@ const DroppableTaskColumn = ({
   }
 
   return (
-    <Card shadow="sm" padding={"sm"} radius="md" withBorder bg={"#f1f2f4"}>
-      <Card.Section py={"xs"} inheritPadding>
-        <Text size={"md"} fw={500} ml={"sm"}>
-          {data.name}
-        </Text>
-      </Card.Section>
+    <Card shadow="sm" padding={"sm"} radius="md" bg={"#eeeeee"}>
+      <Box mb={rem(16)} mt={rem(4)}>
+        {renderColumnHeader(data?.name, data?.tasks?.length)}
+      </Box>
       <Droppable droppableId={data.id} type="task">
         {(provided) => (
           <div

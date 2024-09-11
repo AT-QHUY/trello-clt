@@ -21,5 +21,4 @@ public class UpdateTaskDto {
     private boolean isPublic;
     private Date dueDate;
     private UUID taskListId;
-    private long position;
 }

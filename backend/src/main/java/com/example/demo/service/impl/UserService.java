@@ -32,18 +32,28 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailService customUserDetailService;
 
+
+    // FR8: Login
+    // Input: email, password
+    // Output: access_token, refresh_token
     @Override
     public TokenDto getTokensByEmailAndPassword(String email, String password) {
+        // Load user data by email
         CustomUserDetails userDetails = customUserDetailService.loadUserByEmail(email);
 
+        // Check input password integrity base on db's password
         if(!passwordEncoder.matches(password, userDetails.getPassword())){
             throw new BadCredentialsException("Bad credentials");
         }
 
+        // Generate tokens
         return jwtService.generateTokens(userDetails);
 
     }
 
+    // FR(TODO): Refresh token
+    // Input: old(access_token, refresh_token)
+    // Output new(access_token, refresh_token)
     @Override
     public TokenDto refreshToken(TokenDto tokenDto) {
         UUID accessTokenId = jwtService.extractId(tokenDto.getAccessToken(), JWT.ACCESS_TOKEN);
@@ -61,11 +71,17 @@ public class UserService implements IUserService {
 
     }
 
+
+    // FR(TODO): Get all users
     @Override
     public List<GetUserDto> getAllUsers() {
         throw new EntityNotFoundException();
     }
 
+    // FR7: Register new user
+    // Input: username, email, password
+    // Output: access_token, refresh_token
+    // Business: - New account is created with role "USER"
     @Override
     public TokenDto createNewUser(CreateUserDto createUserDto) {
         String encodedPassword = passwordEncoder.encode(createUserDto.getPassword());
@@ -84,6 +100,7 @@ public class UserService implements IUserService {
 
     }
 
+    // FR(TODO): Get user by id
     @Override
     public GetUserDto getUserById(UUID id) {
        Optional<User> user = userRepository.findById(id);
@@ -93,16 +110,21 @@ public class UserService implements IUserService {
         return UserMapper.toDto(user.get());
     }
 
+    // Get default user
+    // Input: user id
+    // Output: User data
     @Override
     public Optional<User> getDefaultUserById(UUID id) {
         return userRepository.findById(id);
     }
 
+    // FR(TODO): delete user by id
     @Override
     public boolean deleteUserById(UUID id) {
         return false;
     }
 
+    // FR(TODO): update user by id
     @Override
     public GetUserDto updateUser(UpdateUserDto updateUserDto) {
         return null;

@@ -1,8 +1,8 @@
-import { ActionIcon, Avatar, Box, Flex, Group, Paper, rem, Stack, Text } from "@mantine/core";
+import { Avatar, Box, Flex, Group, Paper, rem, Stack, Text, Tooltip } from "@mantine/core";
 import classes from "./DraggableTaskRow.module.css";
 import cx from "clsx";
 import { Draggable } from "@hello-pangea/dnd";
-import { IconBrandTeams, IconCalendar } from "@tabler/icons-react";
+import { IconBrandTeams } from "@tabler/icons-react";
 import { Task } from "../../models/Task";
 import dayjs from "dayjs";
 
@@ -20,7 +20,7 @@ const DraggableTaskRow = ({ index, isDraggable, rowData }: DraggableTaskRowProps
   if (!isDraggable) {
     return (
       <Box>
-        <Paper shadow="sm" withBorder radius={"md"} className={classes.item}>
+        <Paper shadow="sm" radius={"md"} className={classes.item}>
           <TaskRow rowData={rowData} />
         </Paper>
       </Box>
@@ -55,24 +55,15 @@ const renderDueDate = (dueDate: Date) => {
   return (
     <Group
       bg={"yellow"}
-      gap={4}
       px={"xs"}
-      py={3}
+      py={1}
       style={{
         borderRadius: rem(3),
       }}
       align="center"
     >
-      <IconCalendar
-        style={{
-          width: "1rem",
-          height: "1rem",
-          color: "#fff",
-        }}
-        stroke={2.4}
-      />
       <Text size="sm" c={"#fff"} fw={500}>
-        {dayjs(dueDate).format("DD/MM")}
+        {dayjs(dueDate).format("MMM DD, YYYY")}
       </Text>
     </Group>
   );
@@ -90,9 +81,9 @@ export const TaskRow = ({ rowData }: TaskRowProps) => {
         style={{
           alignSelf: "center",
         }}
-        mb={rem(8)}
+        mb={rem(12)}
       >
-        <Text size="sm" c={"#374153"} truncate="end" flex={1} pt={rem(6)}>
+        <Text size="md" fw={500} maw={rem(300)} lineClamp={2} pt={rem(6)}>
           {rowData.title}
         </Text>
         {renderDueDate(rowData.dueDate)}
@@ -101,18 +92,22 @@ export const TaskRow = ({ rowData }: TaskRowProps) => {
         <Box></Box>
         <Flex mr={rem(6)} mb={rem(6)} gap={rem(8)}>
           {rowData?.attender && (
-            <Avatar color="initials" size={"sm"} w={rem(24)} h={rem(24)}>
-              {rowData?.attender?.username.substring(0, 1)}
-            </Avatar>
+            <Tooltip label={rowData?.attender?.username}>
+              <Avatar color="initials" size={"sm"} w={rem(24)} h={rem(24)}>
+                {rowData?.attender?.username.substring(0, 1)}
+              </Avatar>
+            </Tooltip>
           )}
           {rowData?.isPublic ? (
-            <IconBrandTeams
-              color="red"
-              style={{
-                width: rem(24),
-                height: rem(24),
-              }}
-            />
+            <Tooltip label="Team task">
+              <IconBrandTeams
+                color="red"
+                style={{
+                  width: rem(24),
+                  height: rem(24),
+                }}
+              />
+            </Tooltip>
           ) : (
             <Box w={rem(24)} h={rem(24)} />
           )}
